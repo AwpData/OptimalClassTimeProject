@@ -43,6 +43,16 @@ public:
 			current = current->next;
 		}
 	}
+	~Students() { // Destructor for all student linked lists 
+		StudentNode* current = front;
+		StudentNode* garbage = current;
+		while (current != nullptr) {
+			garbage = current;
+			current = current->next;
+			delete garbage;
+		}
+		front = nullptr;
+	}
 };
 
 struct ListNode { // ListNode stores the 'double' time as well as a counter, students linked list, and the next node it points to 
@@ -104,7 +114,7 @@ public:
 		}
 	}
 
-	void displayList(int day) { // Displays the Linked List for a given day (in numerical form) 
+	void displayList(int day, int matches = 1) { // Displays the Linked List for a given day (in numerical form) 
 		ListNode* current = front;
 		string dayText;
 
@@ -135,12 +145,14 @@ public:
 		cout << fixed << showpoint << setprecision(1); // Quick output formatting 
 		while (current != nullptr) { // While there are still students in the list 
 			// FORMAT: (day): (time) (# of students) chose this: (student#) (student#) ... 
-			cout << dayText << ": ";
-			cout << current->time << " ";
-			cout << right << setw(10) << current->counter << " student(s) chose this: ";
-			current->students->display();
+			if (current->counter >= matches) {
+				cout << dayText << ": ";
+				cout << current->time << " ";
+				cout << right << setw(10) << current->counter << " student(s) chose this: ";
+				current->students->display();
+				cout << endl;
+			}
 			current = current->next;
-			cout << endl;
 		}
 	}
 
@@ -150,6 +162,7 @@ public:
 		while (current != nullptr) {
 			garbage = current;
 			current = current->next;
+			delete garbage->students; // calls student's destructor to delete the student linked list attached to the day's time's linked node 
 			delete garbage;
 		}
 		front = nullptr;
@@ -186,7 +199,8 @@ int main()
 			if (input == "") { // Some files have an extra blank line in them, so just in case this happens, I break to avoid crash 
 				break;
 			}
-			// Need to check for valid character input!
+			// Need to check for valid character input and warn the user that it is poor formatting 
+
 			const char* s = input.c_str(); // Converts string to c-string
 			char* sCopy = new char[input.length() + 1]; // Creates another char array
 			strncpy_s(sCopy, input.length() + 1, s, _TRUNCATE); // Copies the c-string 's' (which is made up of characters) into our char array 'sCopy'
@@ -215,12 +229,14 @@ int main()
 			else if (day.find("sun") != -1) {
 				dayIndex = 6;
 			}
-			pch = strtok(NULL, " ,"); // Gets the first number
+
+			pch = strtok(NULL, " ,"); // Gets the first number by using 'space' and 'comma' as delimitters 
 			while (pch != NULL) { // While pch can stil find more numbers 
 				string preParsedTime = pch; // first I have to set the chars to a string
 				double time = stod(preParsedTime); // Then I parse string to double (because of possible half-hour times at '.5' value) 
 				startTimes[dayIndex].add(time, fileName); // Then I add the time to my LinkedList array based on the day index 
-				pch = strtok(NULL, " ,"); // Gets the next number
+				pch = strtok(NULL, " ,"); // Gets the next number if same delimitters 
+
 			}
 			delete[] sCopy; // Free up memory!
 		}
@@ -236,15 +252,35 @@ int main()
 			cin.ignore();
 			continue;
 		}
-		else if (choice == "N" || choice == "n") { // If no, then we display the student list 
+		else { // If no, then we display the student list 		
+			moreFiles = false; // No more files to add
+			int matches = -1; // Variable to check for matches
+			while (matches != 0) { // While the user does not want to quit (matches == 0)
+				cout << "\nFull Time Data:\n" << endl;
+				for (int i = 0; i < 7; i++) { // First it prints the entire list of all days and times 
+					startTimes[i].displayList(i);
+					cout << "\n";
+				}
+				cout << "How many matches should I display minimum? (0 to quit)" << endl;
 
-			// Should ask user for minimum number of matches (if user wants 2, only show times for users that have 2 times) 
-			cout << "\nTime Data:\n" << endl;
-			for (int i = 0; i < 7; i++) {
-				startTimes[i].displayList(i);
-				cout << "\n";
+				cin >> matches; // Gets number of matches user wants minimum 
+				if (matches == 0) { // if = 0, then quit 
+					cout << "Quitting program..." << endl;
+					break;
+				}
+				else if (matches < 0 || matches > 4) { // This is out of range checker 
+					cout << "Invalid input, try again" << endl;
+				}
+				else { // Valid input 
+					cout << "Time Data limited to " << matches << " minimum matches:\n" << endl;
+					for (int i = 0; i < 7; i++) { // Displays user's minimum matches by replacing the default argument of the second parameter
+						startTimes[i].displayList(i, matches);
+					}
+					cout << "Press ENTER to continue" << endl;
+					cin.ignore();
+					cin.get();
+				}
 			}
-			moreFiles = false;
 		}
 	}
 	timeFile.close();
