@@ -1,0 +1,2 @@
+C:\Users\Trevor Tang\source\repos\OptimalClassTimeProject\ConsoleApplication1\Debug\ConsoleApplication1.exe
+C:\Users\Trevor Tang\source\repos\OptimalClassTimeProject\ConsoleApplication1\Debug\ConsoleApplication1.pdb
