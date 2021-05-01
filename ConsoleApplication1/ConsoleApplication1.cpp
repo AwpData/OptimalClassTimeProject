@@ -3,6 +3,7 @@
 #include <string>
 #include <stdio.h>
 #include <iomanip>
+#include <Windows.h>
 #pragma warning(disable : 4996) // supresses error for the outdated 'strtok' method 
 using namespace std;
 
@@ -229,11 +230,22 @@ int main()
 			else if (day.find("sun") != -1) {
 				dayIndex = 6;
 			}
-
 			pch = strtok(NULL, " ,"); // Gets the first number by using 'space' and 'comma' as delimitters 
-			while (pch != NULL) { // While pch can stil find more numbers 
+			if (pch == NULL) { // This will fire if there is no semi-colon 
+				cout << "\nError (line 236), file is poorly formatted. Cannot read the first time, please reformat or enter another file\n" << endl;
+			}
+			while (pch != NULL) { // While pch can stil find more numbers (if pch is initially null, this won't execute at all
 				string preParsedTime = pch; // first I have to set the chars to a string
-				double time = stod(preParsedTime); // Then I parse string to double (because of possible half-hour times at '.5' value) 
+				double time;
+				try {
+					time = stod(preParsedTime);
+				}
+				catch (exception e) { // This will execute if the time cannot be processed to a double 
+					cout << "\n Error (line 246), found a badly formatted time. I am skipping over the rest of the file.\n" << endl;
+					continue;
+				}
+				// Then I parse string to double (because of possible half-hour times at '.5' value) 
+				cout << time << " processed..." << endl;
 				startTimes[dayIndex].add(time, fileName); // Then I add the time to my LinkedList array based on the day index 
 				pch = strtok(NULL, " ,"); // Gets the next number if same delimitters 
 
