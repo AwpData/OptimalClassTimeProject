@@ -3,7 +3,7 @@
 #include <string>
 #include <stdio.h>
 #include <iomanip>
-#include <Windows.h>
+
 #pragma warning(disable : 4996) // supresses error for the outdated 'strtok' method 
 using namespace std;
 
@@ -77,7 +77,7 @@ public:
 	LinkedList() {
 		front = nullptr;
 	}
-	// Need to make sure all time counters add up for all 8 (0-7) students 
+
 	void add(double time, string studentName) {
 		if (front == nullptr) { // If the list is empty 
 			front = new ListNode(time);
@@ -119,7 +119,7 @@ public:
 		ListNode* current = front;
 		string dayText;
 
-		switch (day) { // Adjusts int to string for readability 
+		switch (day) { // Adjusts day integer value to string for readability 
 		case 0:
 			dayText = "Monday";
 			break;
@@ -146,11 +146,11 @@ public:
 		cout << fixed << showpoint << setprecision(1); // Quick output formatting 
 		while (current != nullptr) { // While there are still students in the list 
 			// FORMAT: (day): (time) (# of students) chose this: (student#) (student#) ... 
-			if (current->counter >= matches) {
-				cout << dayText << ": ";
-				cout << current->time << " ";
-				cout << right << setw(10) << current->counter << " student(s) chose this: ";
-				current->students->display();
+			if (current->counter >= matches) { // Default is 1, but it will only print times with (matches) # of matches 
+				cout << dayText << ": "; // First print the day
+				cout << current->time << " "; // Then the time
+				cout << right << setw(10) << current->counter << " student(s) chose this: "; // Then how many students chose this time
+				current->students->display(); // And finally display the students who chose this time via the student linked list 
 				cout << endl;
 			}
 			current = current->next;
@@ -200,7 +200,6 @@ int main()
 			if (input == "") { // Some files have an extra blank line in them, so just in case this happens, I break to avoid crash 
 				break;
 			}
-			// Need to check for valid character input and warn the user that it is poor formatting 
 
 			const char* s = input.c_str(); // Converts string to c-string
 			char* sCopy = new char[input.length() + 1]; // Creates another char array
@@ -231,21 +230,21 @@ int main()
 				dayIndex = 6;
 			}
 			pch = strtok(NULL, " ,"); // Gets the first number by using 'space' and 'comma' as delimitters 
-			if (pch == NULL) { // This will fire if there is no semi-colon 
+			if (pch == NULL) { // This will fire if there is no semi-colon or space
 				cout << "\nError (line 236), file is poorly formatted. Cannot read the first time, please reformat or enter another file\n" << endl;
 			}
 			while (pch != NULL) { // While pch can stil find more numbers (if pch is initially null, this won't execute at all
 				string preParsedTime = pch; // first I have to set the chars to a string
 				double time;
 				try {
-					time = stod(preParsedTime);
+					time = stod(preParsedTime); // Tries to convert the given string to a double value 
 				}
 				catch (exception e) { // This will execute if the time cannot be processed to a double 
-					cout << "\n Error (line 246), found a badly formatted time. I am skipping over the rest of the file.\n" << endl;
-					continue;
+					cout << "\n Error (line 246), found a badly formatted time -> (" << pch << "). I am skipping over the rest of the file.\n" << endl;
+					break;
 				}
 				// Then I parse string to double (because of possible half-hour times at '.5' value) 
-				cout << time << " processed..." << endl;
+				cout << "Time " << time << " processed..." << endl;
 				startTimes[dayIndex].add(time, fileName); // Then I add the time to my LinkedList array based on the day index 
 				pch = strtok(NULL, " ,"); // Gets the next number if same delimitters 
 
@@ -273,22 +272,25 @@ int main()
 					startTimes[i].displayList(i);
 					cout << "\n";
 				}
-				cout << "How many matches should I display minimum? (0 to quit)" << endl;
 
+				// MINIMUM MATCH CODE 
+				cout << "How many matches should I display minimum? (0 to quit)" << endl;
 				cin >> matches; // Gets number of matches user wants minimum 
 				if (matches == 0) { // if = 0, then quit 
 					cout << "Quitting program..." << endl;
 					break;
 				}
-				else if (matches < 0 || matches > 4) { // This is out of range checker 
-					cout << "Invalid input, try again" << endl;
+				else if (matches < 0 || matches > 4) { // This is out of range checker which is counted as invalid input 
+					cout << "Invalid input, press ENTER to try again" << endl;
+					cin.ignore();
+					cin.get();
 				}
 				else { // Valid input 
 					cout << "Time Data limited to " << matches << " minimum matches:\n" << endl;
 					for (int i = 0; i < 7; i++) { // Displays user's minimum matches by replacing the default argument of the second parameter
 						startTimes[i].displayList(i, matches);
 					}
-					cout << "Press ENTER to continue" << endl;
+					cout << "\nPress ENTER to continue" << endl; // Just a brief pause (or wait until the user presses ENTER) so they can read the list 
 					cin.ignore();
 					cin.get();
 				}
